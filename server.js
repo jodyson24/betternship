@@ -19,6 +19,11 @@ const port = 8556;
 app.use(express.json());
 app.use(cors());
 
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static('./client/build'));
+}
+
 // Connect to SQLite database
 const db = new sqlite3.Database('./payments.db', (err) => {
     if (err) {
@@ -120,6 +125,13 @@ app.delete('/payments/:id', (req, res) => {
         }
     });
 });
+
+// Serve index.html for all other routes in production
+if (process.env.NODE_ENV === 'production') {
+    app.get('*', (req, res) => {
+        res.sendFile('./client/build/index.html', { root: __dirname });
+    });
+}
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
